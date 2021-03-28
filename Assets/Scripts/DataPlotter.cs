@@ -8,24 +8,34 @@ public class DataPlotter : MonoBehaviour
     // Name of the input file, no extension
     public string[] inputfiles;
 
+    //Getting values for dashboard
+    public string followerCount;
+    public string hashtagCount;
+    public string tweetLength;
+    public string username;
 
     // List for holding data from CSV reader
     private List<Dictionary<string, object>> pointList;
 
     // Indices for columns to be assigned
+    public int userNameColumn = 2;
+
     public int columnX = 1;
     public int columnY = 4;
     public int columnZ = 3;
 
     // Full column names
+    public string post_user;
     public string x_twt_text;
     public string y_fol_count;
     public string z_hshtg_count;
 
     //Store values of x, y, z to get max and min for normalization
+    private List<string> tweetText_List = new List<string>();
     private List<float> x_values = new List<float>();
     private List<float> y_values = new List<float>();
     private List<float> z_values = new List<float>();
+    private List<string> usernames = new List<string>();
 
     // The prefab for the data points to be instantiated
     public GameObject PointPrefab;
@@ -44,10 +54,6 @@ public class DataPlotter : MonoBehaviour
 
         //Log to console
         //Debug.Log(pointList);
-
-
-
-
 
     }
 
@@ -70,34 +76,41 @@ public class DataPlotter : MonoBehaviour
             //Read from one of the CSV files randomly
             System.Random random = new System.Random();
             int r = random.Next(0, inputfiles.Length);
-            Debug.Log(r);
+            //Debug.Log(r);
             pointList = CSVReader.Read(inputfiles[r]);
 
 
+            //Get list of columns that exist in the CSV file
             List<string> columnList = new List<string>(pointList[1].Keys);
-            Debug.Log("columnList" + string.Join("\t",columnList));
+            //Debug.Log("columnList" + string.Join("\t",columnList));
 
             // Print number of keys (using .count)
-            Debug.Log("There are " + columnList.Count + " columns in CSV");
+            //Debug.Log("There are " + columnList.Count + " columns in CSV");
 
-            foreach (string key in columnList)
-                Debug.Log("Column name is " + key);
+            //foreach (string key in columnList)
+                //Debug.Log("Column name is " + key);
 
             // Assign column name from columnList to Name variables
+            post_user = columnList[userNameColumn];
             x_twt_text = columnList[columnX];
             y_fol_count = columnList[columnY];
             z_hshtg_count = columnList[columnZ];
 
-            //Loop through Pointlist
+            //Loop through Pointlist and get values for each column in a list
             for (var i = 0; i < pointList.Count; i++)
             {
-                Debug.Log(pointList[i][x_twt_text].ToString().Length);
-                x_values.Add(pointList[i][x_twt_text].ToString().Length);
-                Debug.Log(pointList[i][y_fol_count]);
-                y_values.Add(System.Convert.ToSingle(pointList[i][y_fol_count]));
-                Debug.Log(pointList[i][z_hshtg_count].ToString().Split(new char[] { ',' }).Length);
-                z_values.Add(pointList[i][z_hshtg_count].ToString().Split(new char[] { ',' }).Length);
+                //Get List of tweet texts
+                tweetText_List.Add(pointList[i][x_twt_text].ToString());
                 
+                //Get List of tweet text Length
+                x_values.Add(pointList[i][x_twt_text].ToString().Length);
+                //Get LIst of Follower counts
+                y_values.Add(System.Convert.ToSingle(pointList[i][y_fol_count]));
+                //Get List of Hashtag counts
+                z_values.Add(pointList[i][z_hshtg_count].ToString().Split(new char[] { ',' }).Length);
+                //Get list of usernames form CSV file
+                usernames.Add(pointList[i][post_user].ToString());
+
                 // Get maxes of each axis
                 float xMax = FindMaxValue(x_values);
                 float yMax = FindMaxValue(y_values);
@@ -107,6 +120,8 @@ public class DataPlotter : MonoBehaviour
                 float xMin = FindMinValue(x_values);
                 float yMin = FindMinValue(y_values);
                 float zMin = FindMinValue(z_values);
+
+                
 
                 // Get value in poinList at ith "row", in "column" Name, normalize
                 float x =
@@ -141,7 +156,8 @@ public class DataPlotter : MonoBehaviour
 
                 // Assigns original values to dataPointName
                 string dataPointName = pointList[i][x_twt_text].ToString();
-                    
+                //Export actual values of Follower-count, Tweet length and hashtag counts to Inspector
+
 
                 // Assigns name to the prefab
                 dataPoint.transform.name = dataPointName;
@@ -151,9 +167,13 @@ public class DataPlotter : MonoBehaviour
                 new Color(x, y, z, 1.0f);
                 
             }
-            Debug.Log("X_Values: " + x_values.Count);
-            Debug.Log("Y_Values: " + y_values.Count);
-            Debug.Log("Z_Values: " + z_values.Count);
+            Debug.Log("tweetText_list Length: " + tweetText_List.Count);
+            Debug.Log("Text Lenght list Length: " + x_values.Count);
+            Debug.Log("Follower count list Length: " + y_values.Count);
+            Debug.Log("Hashtage count list Length: " + z_values.Count);
+            //Debug.Log("X_Values: " + x_values.Count);
+            //Debug.Log("Y_Values: " + y_values.Count);
+            //Debug.Log("Z_Values: " + z_values.Count);
 
         }
     }
@@ -187,6 +207,28 @@ public class DataPlotter : MonoBehaviour
         }
 
         return minValue;
+    }
+
+    public List<string> GetValues(string tweetText)
+    {
+        List<string> result = new List<string>(4);
+        //get the tweetText and find its index int tweet list
+        Debug.Log("tweetText from GetValues :::::::::::::::::::::::::::::::"+tweetText);
+        var index = tweetText_List.IndexOf(tweetText);
+        Debug.Log("Index of selected text: " + index);
+        //use the index to find username, tweetlength, hashtag count and follower count of that tweet
+        followerCount = y_values[index].ToString();
+        hashtagCount = z_values[index].ToString();
+        tweetLength = x_values[index].ToString();
+        username = usernames[index] ;
+        //return list of found values in string format
+        result.Add(username);
+        result.Add(followerCount);
+        result.Add(tweetLength);
+        result.Add(hashtagCount);
+
+        Debug.Log(String.Join(", ", result));
+        return result;
     }
 }
 
