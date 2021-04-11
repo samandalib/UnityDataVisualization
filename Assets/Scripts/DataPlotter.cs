@@ -49,7 +49,6 @@ public class DataPlotter : MonoBehaviour
     public float plotScale = 20;
 
 
-    public bool _newFileSelected;
 
     void Start()
     {
@@ -66,7 +65,7 @@ public class DataPlotter : MonoBehaviour
     private void Update()
     {
         inputfile = FileManager.selectedFileName;
-        _newFileSelected = FileManager.newFileSelected;
+
         //if (Input.GetKeyDown(KeyCode.G))
         if (FileManager.newFileSelected)
         {
