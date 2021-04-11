@@ -6,7 +6,10 @@ using System;
 public class DataPlotter : MonoBehaviour
 {
     // Name of the input file, no extension
-    public string[] inputfiles;
+    //public string[] inputfiles;
+    public string inputfile;
+    //public GameObject FileManager;
+
 
     //Getting values for dashboard
     public string followerCount;
@@ -45,13 +48,16 @@ public class DataPlotter : MonoBehaviour
 
     public float plotScale = 20;
 
-    // Start is called before the first frame update
+
+    public bool _newFileSelected;
+
     void Start()
     {
         // Set pointlist to results of function Reader with argument inputfile
         //pointList = CSVReader.Read(inputfiles[0]);
 
 
+        //newFileSelected = false;
         //Log to console
         //Debug.Log(pointList);
 
@@ -59,9 +65,14 @@ public class DataPlotter : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.G))
+        inputfile = FileManager.selectedFileName;
+        _newFileSelected = FileManager.newFileSelected;
+        //if (Input.GetKeyDown(KeyCode.G))
+        if (FileManager.newFileSelected)
         {
+            FileManager.newFileSelected = false;
             
+
             if (PointHolder.transform.childCount > 0)
             {
                 for (int i = 0; i <= PointHolder.transform.childCount; i++)
@@ -71,24 +82,17 @@ public class DataPlotter : MonoBehaviour
                     Destroy(child);
                 }
             }
-
             
+
             //Read from one of the CSV files randomly
-            System.Random random = new System.Random();
-            int r = random.Next(0, inputfiles.Length);
-            //Debug.Log(r);
-            pointList = CSVReader.Read(inputfiles[r]);
+            //System.Random random = new System.Random();
+            //int r = random.Next(0, inputfiles.Length);
+            //pointList = CSVReader.Read(inputfiles[r]);
+            pointList = CSVReader.Read(inputfile);
 
 
             //Get list of columns that exist in the CSV file
             List<string> columnList = new List<string>(pointList[1].Keys);
-            //Debug.Log("columnList" + string.Join("\t",columnList));
-
-            // Print number of keys (using .count)
-            //Debug.Log("There are " + columnList.Count + " columns in CSV");
-
-            //foreach (string key in columnList)
-                //Debug.Log("Column name is " + key);
 
             // Assign column name from columnList to Name variables
             post_user = columnList[userNameColumn];
@@ -101,7 +105,7 @@ public class DataPlotter : MonoBehaviour
             {
                 //Get List of tweet texts
                 tweetText_List.Add(pointList[i][x_twt_text].ToString());
-                
+
                 //Get List of tweet text Length
                 x_values.Add(pointList[i][x_twt_text].ToString().Length);
                 //Get LIst of Follower counts
@@ -121,7 +125,7 @@ public class DataPlotter : MonoBehaviour
                 float yMin = FindMinValue(y_values);
                 float zMin = FindMinValue(z_values);
 
-                
+
 
                 // Get value in poinList at ith "row", in "column" Name, normalize
                 float x =
@@ -132,18 +136,6 @@ public class DataPlotter : MonoBehaviour
 
                 float z =
                 (z_values[i] - zMin) / (zMax - zMin);
-                
-
-                //Absolut Values 
-                // Get value in poinList at ith "row", in "column" Name
-                //int x = pointList[i][xName];
-                //float y = pointList[i][yName];
-                //float z = pointList[i][zName];
-
-
-                
-                //instantiate the prefab with coordinates defined above
-                //Instantiate(PointPrefab, new Vector3(x, y, z), Quaternion.identity);
 
                 // Instantiate as gameobject variable so that it can be manipulated within loop
                 GameObject dataPoint = Instantiate(
@@ -165,15 +157,12 @@ public class DataPlotter : MonoBehaviour
                 // Gets material color and sets it to a new RGBA color we define
                 dataPoint.GetComponent<Renderer>().material.color =
                 new Color(x, y, z, 1.0f);
-                
+
             }
             Debug.Log("tweetText_list Length: " + tweetText_List.Count);
             Debug.Log("Text Lenght list Length: " + x_values.Count);
             Debug.Log("Follower count list Length: " + y_values.Count);
             Debug.Log("Hashtage count list Length: " + z_values.Count);
-            //Debug.Log("X_Values: " + x_values.Count);
-            //Debug.Log("Y_Values: " + y_values.Count);
-            //Debug.Log("Z_Values: " + z_values.Count);
 
         }
     }
@@ -213,9 +202,9 @@ public class DataPlotter : MonoBehaviour
     {
         List<string> result = new List<string>(4);
         //get the tweetText and find its index int tweet list
-        Debug.Log("tweetText from GetValues :::::::::::::::::::::::::::::::"+tweetText);
+        
         var index = tweetText_List.IndexOf(tweetText);
-        Debug.Log("Index of selected text: " + index);
+        
         //use the index to find username, tweetlength, hashtag count and follower count of that tweet
         followerCount = y_values[index].ToString();
         hashtagCount = z_values[index].ToString();
