@@ -5,10 +5,9 @@ using System;
 
 public class DataPlotter : MonoBehaviour
 {
-    // Name of the input file, no extension
-    //public string[] inputfiles;
+
     public string inputfile;
-    //public GameObject FileManager;
+
 
 
     //Getting values for dashboard
@@ -45,20 +44,14 @@ public class DataPlotter : MonoBehaviour
 
     // The prefab for the data points that will be instantiated
     public GameObject PointHolder;
-
+    public GameObject selectionIndicator;
+    public Transform indicators;
     public float plotScale = 20;
 
 
 
     void Start()
     {
-        // Set pointlist to results of function Reader with argument inputfile
-        //pointList = CSVReader.Read(inputfiles[0]);
-
-
-        //newFileSelected = false;
-        //Log to console
-        //Debug.Log(pointList);
 
     }
 
@@ -78,15 +71,13 @@ public class DataPlotter : MonoBehaviour
 
                 {
                     GameObject child = PointHolder.transform.GetChild(i).gameObject;
+                    selectionIndicator.transform.SetParent(indicators);
+                    selectionIndicator.SetActive(false);
                     Destroy(child);
                 }
             }
             
 
-            //Read from one of the CSV files randomly
-            //System.Random random = new System.Random();
-            //int r = random.Next(0, inputfiles.Length);
-            //pointList = CSVReader.Read(inputfiles[r]);
             pointList = CSVReader.Read(inputfile);
 
 
